@@ -1,7 +1,7 @@
 ---
 name: note-graph
 description: Read the user's note-graph index, which lists the bot-ingested notes and tools/ideas they have saved, queryable by topic. Use when asked "what do I have about X", "what notes/tools do I know", or to recall saved resources.
-trigger: /note-graph
+license: MIT
 ---
 
 # /note-graph
@@ -9,7 +9,7 @@ trigger: /note-graph
 A read-only view over the note-graph index built from the user's vault notes.
 The index is maintained by the note-graph project; this skill only reads it.
 
-The index folder is `~/note-graph` unless `~/.claude/skill-config/note-graph.md`
+The index folder is `~/note-graph` unless `~/.agents/skill-config/note-graph.md`
 sets `index_dir` to another folder (format in this skill's `config.example.md`).
 
 ## Usage

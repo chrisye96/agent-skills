@@ -1,6 +1,6 @@
 # Business config (example)
 
-Copy this file to `~/.claude/skill-config/business.md` and fill it in. That copy
+Copy this file to `~/.agents/skill-config/business.md` and fill it in. That copy
 stays on your machine and is never committed. The `invoice` and
 `pricing-services` skills both read it.
 

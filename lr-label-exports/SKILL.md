@@ -1,6 +1,8 @@
 ---
 name: lr-label-exports
 description: Find the Lightroom Classic catalog photos behind a folder of exported JPEGs and give them a colour label (or undo that), through the Cull Remote plugin's local API. Use whenever the user wants exported or delivered photos traced back to Lightroom and marked, for example "给作品集里的照片打绿色色标", "把这些导出的照片在 LR 里找出来", "标出交付给客户的照片", "which raws are these exports", "label my portfolio picks in Lightroom", or wants to know whether several export folders duplicate each other. Also use to undo such a labelling run.
+license: MIT
+compatibility: Needs Node 22+, Lightroom Classic running with the Cull Remote plugin on the same machine, and an agent that can view images for ambiguous matches.
 ---
 
 # Label exported photos in Lightroom
@@ -11,7 +13,7 @@ Exports carry names like `251005_Ramjhat_Garba_DSCF6548_Web.jpg`; the catalog ph
 
 - Lightroom must be open with the Cull Remote plugin enabled; the plugin starts the server on `http://127.0.0.1:47800`. Every script checks this and says what is wrong.
 - Labels are written to the **real catalog**. Reading is always safe. To try the scripts without touching the catalog, run the dev instance from the cull-remote repo (`LRC_DEV=1 node server/index.js` plus `node spike/stand-in-plugin.mjs`) and pass `--base http://127.0.0.1:47810`.
-- Needs Node 22 or newer. Scripts live in this skill's `scripts/`. Put the working files (`targets.json`, `catalog.json`, `matches.json`, previews) in the session scratchpad. Undo logs go to `~/.cache/lr-label-exports/` by themselves, because they must outlive the session.
+- Needs Node 22 or newer. Scripts live in this skill's `scripts/`. Put the working files (`targets.json`, `catalog.json`, `matches.json`, previews) in a temporary working folder (the agent's scratch folder if it has one), not in the export folders. Undo logs go to `~/.cache/lr-label-exports/` by themselves, because they must outlive the session.
 - Only `rating`, `label` and `pickStatus` can be written through Cull Remote, so the worst a mistake can do is a wrong label, which `undo.mjs` reverts.
 
 ## Workflow
@@ -45,10 +47,10 @@ A target matches a catalog photo with the same camera name shot within a day of 
 - **UNIQUE**: nothing to decide.
 - **MULTI**: the hint says why.
   - *virtual copies* (same file listed twice) or *several formats* of one shoot (RAF and DNG, NEF with its TIF and PSD): it is the same picture and you cannot tell which copy was exported, so label them all. That keeps a label filter complete.
-  - *several folders* from different shoots, usually when the export had no date: compare by eye. Save the candidates' thumbnails with `node scripts/preview.mjs <dir> <id>...`, make a small copy of the export (below), view them with Read, and exclude the wrong candidates later with `--exclude-id`.
+  - *several folders* from different shoots, usually when the export had no date: compare by eye. Save the candidates' thumbnails with `node scripts/preview.mjs <dir> <id>...`, make a small copy of the export (below), open the images to look at them, and exclude the wrong candidates later with `--exclude-id`.
 - **NONE**: look at the "same name, other shoot" lines and at `editedWith` in `targets.json`. Photos edited in Capture One as DNG, or shot on a phone, are often not in this catalog at all. Report them; do not label a same-named photo from another shoot.
 
-Small copy of an export for viewing (full-size exports can be 10 MB):
+Small copy of an export for viewing (full-size exports can be 10 MB). macOS: `sips -Z 400 "<export.jpg>" --out "<dir>/export.jpg"`. Linux with ImageMagick: `magick "<export.jpg>" -resize 400x "<dir>/export.jpg"`. Windows PowerShell:
 
 ```powershell
 Add-Type -AssemblyName System.Drawing; $i=[System.Drawing.Image]::FromFile("<export.jpg>"); $b=New-Object System.Drawing.Bitmap $i,400,([int](400*$i.Height/$i.Width)); $b.Save("<dir>\export.jpg"); $i.Dispose()

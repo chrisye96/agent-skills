@@ -1,6 +1,7 @@
 ---
 name: web-kit
 description: Check the user's personal web-kit recipe library before writing any website UI from scratch, and copy a recipe instead of rewriting it. Use whenever building, redesigning or polishing a website or web app page, especially navbars and mobile menus, hero or full-bleed photos, page transitions and scroll reveals, sliding underlines and tabs, button press feedback, error and 404 pages, iOS Safari status bar or toolbar colour problems, safe areas, or testing on a real phone or iPad. Also use when the user says 复用, 组件库, web-kit, "do we have something for", "like on cyvisuals", or when you finish improving something that came from a recipe.
+license: MIT
 ---
 
 # web-kit
@@ -11,7 +12,7 @@ wire it in, and the traps that cost real-device test rounds. Rewriting one
 from memory throws all of that away.
 
 Repo (written `<web-kit>` below): `~/source/repos/web-kit`, unless
-`~/.claude/skill-config/web-kit.md` sets `repo` to another folder (format in this
+`~/.agents/skill-config/web-kit.md` sets `repo` to another folder (format in this
 skill's `config.example.md`). Index: `<web-kit>/CATALOG.md`.
 
 ## Before writing UI

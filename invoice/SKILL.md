@@ -1,6 +1,8 @@
 ---
 name: invoice
 description: Use when the user asks to create, draft, revise, or number an invoice for a photography gig, or to write the email that sends it. Triggers include /invoice, 开发票, 开票, 写发票, 发票邮件, 催款, "invoice for", "invoice email", "bill the client", or after-shoot billing talk.
+license: MIT
+compatibility: Needs file read and write access, Python with openpyxl for the tracker, and pdftotext or PyMuPDF for check mode. Built around Zoho Invoice and Pixieset.
 ---
 
 # Photography Invoice
@@ -9,19 +11,19 @@ Draft Zoho-ready invoices from the price book, assign the next invoice number, a
 
 ## Setup
 
-Read `~/.claude/skill-config/business.md` first. Its `business_folder` line is the folder written as `<folder>` below. If that file is missing, stop and tell the user to copy `config.example.md` from this skill's folder to that path and fill it in. Never guess a folder.
+Read `~/.agents/skill-config/business.md` first. Its `business_folder` line is the folder written as `<folder>` below. If that file is missing, stop and tell the user to copy `config.example.md` from this skill's folder to that path and fill it in. Never guess a folder.
 
 ## Sources
 
 Read these before drafting anything:
 
-- `<folder>\PRICE-BOOK.md`: prices, payment and delivery discipline (deposit threshold, same-day rule, invoicing deadline, late fee, e-transfer details), numbering rules, licensing algorithm
-- `<folder>\INVOICE-LEDGER.md`: **the invoice source of truth.** Every issued invoice number, amount, client, hours, and the live retainer balances. Plain Markdown, so read it directly; never parse a PDF for something this file already answers.
-- `<folder>\Invoice-Template.md`: **all client-facing wording.** Segment prefixes and what each covers, sender header, Notes, Terms and Usage Rights blocks per segment, email wording, signature. Its section "发票 skill 实发版" overrides earlier sections where they differ. Take every client-facing sentence from this file, never from memory.
+- `<folder>/PRICE-BOOK.md`: prices, payment and delivery discipline (deposit threshold, same-day rule, invoicing deadline, late fee, e-transfer details), numbering rules, licensing algorithm
+- `<folder>/INVOICE-LEDGER.md`: **the invoice source of truth.** Every issued invoice number, amount, client, hours, and the live retainer balances. Plain Markdown, so read it directly; never parse a PDF for something this file already answers.
+- `<folder>/Invoice-Template.md`: **all client-facing wording.** Segment prefixes and what each covers, sender header, Notes, Terms and Usage Rights blocks per segment, email wording, signature. Its section "发票 skill 实发版" overrides earlier sections where they differ. Take every client-facing sentence from this file, never from memory.
 
-`<folder>\CLIENTS.md` holds client contact facts (email, phone), how each client was met, and licence and portfolio status. Read it for Bill To and the email address before asking the user. It is a copy; Zoho's customer list is the origin for emails.
+`<folder>/CLIENTS.md` holds client contact facts (email, phone), how each client was met, and licence and portfolio status. Read it for Bill To and the email address before asking the user. It is a copy; Zoho's customer list is the origin for emails.
 
-`<folder>\GIG-TRACKER.xlsx` (`Gigs` sheet) holds per-gig hour and $/hr analytics. Read it only when the user asks about time or rate economics. **On any conflict, the ledger wins.**
+`<folder>/GIG-TRACKER.xlsx` (`Gigs` sheet) holds per-gig hour and $/hr analytics. Read it only when the user asks about time or rate economics. **On any conflict, the ledger wins.**
 
 ### Ledger-first rule
 
@@ -33,7 +35,7 @@ Reading PDFs is expensive and unreliable: some Zoho exports carry no extractable
 
 ## Iron rule: never invent a fact
 
-Any price, date, name, photo count, hours figure, or payment method that the user did not state and the sources do not pin down is a QUESTION, not a guess. Collect every gap first, then ask ONCE with AskUserQuestion (batched; free-text gaps go in one follow-up message). Do not drip questions one at a time, and do not output a "draft with placeholders" as the final answer.
+Any price, date, name, photo count, hours figure, or payment method that the user did not state and the sources do not pin down is a QUESTION, not a guess. Collect every gap first, then ask ONCE, all gaps in one batch (use the agent's structured question tool if it has one; free-text gaps go in one follow-up message). Do not drip questions one at a time, and do not output a "draft with placeholders" as the final answer.
 
 ## Validation checklist: ask about any miss or conflict
 
@@ -59,13 +61,13 @@ Any price, date, name, photo count, hours figure, or payment method that the use
 
 Next number = **`INVOICE-LEDGER.md` section 3 ("Next invoice numbers"), max for that prefix + 1.** That section is maintained on every issue and is the answer.
 
-Only if the ledger is missing or does not cover the month, fall back to Glob `**/*<PREFIX>-<YYYYMM>*` over `<folder>` (any extension; historical numbers exist only as `Invoice *.pdf`, `Invoice Invoice #*.pdf`, or bare `*.pdf`), then update the ledger with what you found.
+Only if the ledger is missing or does not cover the month, fall back to searching `<folder>` recursively for files matching `*<PREFIX>-<YYYYMM>*` (any extension; historical numbers exist only as `Invoice *.pdf`, `Invoice Invoice #*.pdf`, or bare `*.pdf`), then update the ledger with what you found.
 
 A `-A`/`-B` suffix or a separate deposit invoice consumes its own file but shares the base sequence. Never renumber an issued invoice; a new prefix applies to future invoices only.
 
 ## Output: one Zoho-ready block
 
-**Where it goes: a file, never the chat window.** Write the invoice and its email into `<folder>\_drafts\<slug>.md`, following the conventions in `_drafts\README.md` (status table at the top, internal reasoning separated from client-facing text, pre-send checklist at the bottom, one file per send). In chat, print only the file path and one line saying what changed. Paste the full block into chat only if the user explicitly asks to see it there.
+**Where it goes: a file, never the chat window.** Write the invoice and its email into `<folder>/_drafts/<slug>.md`, following the conventions in `_drafts/README.md` (status table at the top, internal reasoning separated from client-facing text, pre-send checklist at the bottom, one file per send). In chat, print only the file path and one line saying what changed. Paste the full block into chat only if the user explicitly asks to see it there.
 
 After the user confirms the invoice was sent, delete the draft file as the third step, alongside updating the ledger and the tracker.
 
@@ -90,7 +92,7 @@ Tone: warm, brief, zero apology padding even if the invoice is late against the 
 
 Trigger: the user gives an invoice number and asks to check/verify it (检查, 核对, "check PT-202607-001"), typically after exporting the PDF from Zoho and before sending. This guards the manual paste-into-Zoho step, where transcription errors live.
 
-1. Locate the file: Glob `**/*<number>*` under `<folder>` (naming drifts: `Invoice <n>.pdf`, `<n>.pdf`, `Invoice Invoice #<n>.pdf`). No match → say so, list that month's files, and ask the user to point to or send the file; never "check" a file you did not find, and never skip the check because the file is missing.
+1. Locate the file: search `<folder>` recursively for files matching `*<number>*` (naming drifts: `Invoice <n>.pdf`, `<n>.pdf`, `Invoice Invoice #<n>.pdf`). No match → say so, list that month's files, and ask the user to point to or send the file; never "check" a file you did not find, and never skip the check because the file is missing.
 
    Check mode is the one place the PDF **must** be opened: the whole point is catching transcription errors introduced by the manual paste into Zoho, and only the exported PDF shows those. The ledger is what you check the PDF *against*, never a substitute for reading it. If `pdftotext` returns nothing, the export has no text layer: render the page (PyMuPDF `get_pixmap(dpi=150)` to PNG) and read the image rather than reporting the file as unreadable.
 2. Read the PDF and verify every line against the sources, not from memory:
@@ -106,7 +108,7 @@ Trigger: the user gives an invoice number and asks to check/verify it (检查, �
 
 **1. Update `INVOICE-LEDGER.md` (required).** Add the row to the invoice index, bump section 3 "Next invoice numbers", refresh the "Last updated" date, and, if the gig was a retainer draw, update that retainer's draw table and balances. If the gig had been sitting under "Unbilled work", delete it from there in the same edit; leaving it in both places is how the ledger starts lying.
 
-**2. Append one row to `GIG-TRACKER.xlsx` `Gigs` sheet** with openpyxl (`py`, install openpyxl if missing): first empty row, write ONLY input columns A–I, L–N and O (`Shoot Time`, format `HH:MM-HH:MM`, 24h); J and K hold prefilled formulas, so never write or clear them. Mark estimated editing hours in Notes ("estimate, update after delivery"). `PermissionError` on save = file open in Excel; ask the user to close it and retry.
+**2. Append one row to `GIG-TRACKER.xlsx` `Gigs` sheet** with openpyxl (`py` on Windows, `python3` elsewhere; install openpyxl if missing): first empty row, write ONLY input columns A–I, L–N and O (`Shoot Time`, format `HH:MM-HH:MM`, 24h); J and K hold prefilled formulas, so never write or clear them. Mark estimated editing hours in Notes ("estimate, update after delivery"). `PermissionError` on save = file open in Excel; ask the user to close it and retry.
 
 **3. Update `CLIENTS.md`.** New client: add a row with the email used in Zoho. Existing client: add the new invoice number to the Invoices cell and fix any changed contact detail. Refresh "Last updated".
 

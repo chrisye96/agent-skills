@@ -1,6 +1,7 @@
 ---
 name: demo-menu
 description: Build a dev-only demo panel that switches between design variants on the real pages of a web app, so the user can compare options in context (desktop and phone) before anything is implemented. Use whenever the user wants to see options before deciding, e.g. "做个demo", "出几个方案切换看看", "先demo来对比", "show me a few versions", "let me compare A and B on the site", "add it to the demo menu", or when you are about to propose two or more visual/UI/motion options for an existing page. Also use to add, prune or restyle rows of an existing demo panel, and when folding a chosen variant into real code.
+license: MIT
 ---
 
 # Demo menu

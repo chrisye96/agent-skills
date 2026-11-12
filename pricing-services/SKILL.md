@@ -1,6 +1,7 @@
 ---
 name: pricing-services
 description: Use when a freelancer or small service business asks what to charge, how to quote a job or client, whether their rates are too low, or how to raise prices without losing existing clients. Applies to photography, video, design, development, tutoring, and any service work. Also triggers on 报价, 定价, "what should I charge", "am I charging too little".
+license: MIT
 ---
 
 # Pricing Services
@@ -47,14 +48,14 @@ Past gigs and amounts; hidden hours per gig; opportunity cost; monthly capacity 
 
 End every engagement with three artifacts: (a) the quote menu for this job, (b) a ready-to-send client message in the client's language, (c) a reusable price sheet the next quote can start from.
 
-**Where they go** depends on whether `~/.claude/skill-config/business.md` exists (format
+**Where they go** depends on whether `~/.agents/skill-config/business.md` exists (format
 in this skill's `config.example.md`; the `invoice` skill reads the same file).
 
 - **It exists:** a file, never the chat window. Write all three into
-  `<business_folder>\_drafts\QUOTE-<slug>.md`, following the conventions in
-  `_drafts\README.md`: status table at the top, pricing reasoning under an "internal, do
+  `<business_folder>/_drafts/QUOTE-<slug>.md`, following the conventions in
+  `_drafts/README.md`: status table at the top, pricing reasoning under an "internal, do
   not send" heading, the client letter in its own copyable code block, open items at the
   bottom. In chat, print only the file path and one line saying what changed. Delete the
   draft once the job is booked or declined, recording the outcome in
-  `<business_folder>\GIG-TRACKER.xlsx` either way.
+  `<business_folder>/GIG-TRACKER.xlsx` either way.
 - **It does not exist:** keep the three artifacts in the reply.

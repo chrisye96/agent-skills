@@ -3,7 +3,7 @@
 Without this file the skill puts its quote, client message and price sheet in the
 reply. With it, they go into a draft file in your business folder instead.
 
-Copy this file to `~/.claude/skill-config/business.md` and fill it in. That copy
+Copy this file to `~/.agents/skill-config/business.md` and fill it in. That copy
 stays on your machine and is never committed. The `invoice` skill reads the same
 file, so if you already set it up there, you are done.
 
