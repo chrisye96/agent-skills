@@ -1,0 +1,10 @@
+# Personal settings never belong here; they live in ~/.claude/skill-config/
+config.md
+config.local.md
+*.local.md
+
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
